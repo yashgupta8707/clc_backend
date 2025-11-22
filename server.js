@@ -20,8 +20,7 @@ const corsOptions = {
       'http://localhost:3000',              // React dev server
       'http://localhost:5174',              // Alternative Vite port
       'http://localhost:4173',              // Vite preview
-      'https://citylawcollege.onrender.com', // Production frontend (update with your actual domain)
-      'https://www.citylawcollege.com',     // Production domain (if different)
+      'https://citycollegeofmanagement.vercel.app', // Production frontend (update with your actual domain)
     ];
 
     // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
