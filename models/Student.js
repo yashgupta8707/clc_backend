@@ -127,6 +127,11 @@ const studentSchema = new mongoose.Schema(
       signature: String,
     },
 
+    declarationAccepted: {
+      type: Boolean,
+      default: false,
+    },
+
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],
