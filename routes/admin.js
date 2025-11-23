@@ -2,7 +2,6 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const authMiddleware = require('../middleware/auth');
 const Student = require('../models/Student');
 const Contact = require('../models/Contact');
 
