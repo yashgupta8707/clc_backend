@@ -109,6 +109,7 @@ mongoose.connection.on('error', (err) => {
 const studentRoutes = require('./routes/students');
 const contactRoutes = require('./routes/contact');
 const courseRoutes = require('./routes/courses');
+const adminRoutes = require('./routes/admin');
 
 // ============================================================
 // API Routes
@@ -116,6 +117,7 @@ const courseRoutes = require('./routes/courses');
 app.use('/api/students', studentRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ============================================================
 // Root Route
@@ -129,7 +131,8 @@ app.get('/', (req, res) => {
       students: '/api/students',
       registration: '/api/students/register',
       contact: '/api/contact',
-      courses: '/api/courses'
+      courses: '/api/courses',
+      admin: '/api/admin'
     },
     status: 'Server is running',
     timestamp: new Date().toISOString()
@@ -245,8 +248,12 @@ app.listen(PORT, () => {
   console.log(`  GET  /health              - Health check`);
   console.log(`  POST /api/students/register - Student registration`);
   console.log(`  GET  /api/students/:id    - Get student details`);
-  console.log(`  POST /api/contact         - Contact form`);
+  console.log(`  POST /api/contact/submit  - Contact form`);
   console.log(`  GET  /api/courses         - Get courses`);
+  console.log(`  POST /api/admin/login     - Admin login`);
+  console.log(`  GET  /api/admin/dashboard/stats - Dashboard stats`);
+  console.log(`  GET  /api/admin/students  - Get all students (admin)`);
+  console.log(`  GET  /api/admin/messages  - Get all messages (admin)`);
   console.log('='.repeat(50));
 });
 
