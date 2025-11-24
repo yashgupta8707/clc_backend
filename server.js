@@ -42,17 +42,6 @@ const corsOptions = {
   maxAge: 600 // Cache preflight requests for 10 minutes
 };
 
-app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
-
-// ============================================================
-// Body Parser Middleware
-// ============================================================
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
 // ============================================================
 // Serve Static Files (Uploaded Photos & Signatures)
 // ============================================================
@@ -69,6 +58,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
     res.set('Access-Control-Allow-Origin', '*');
   }
 }));
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
+// ============================================================
+// Body Parser Middleware
+// ============================================================
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ============================================================
 // Request Logging Middleware (Development)
