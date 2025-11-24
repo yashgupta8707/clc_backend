@@ -16,11 +16,12 @@ const corsOptions = {
   origin: function (origin, callback) {
     // List of allowed origins
     const allowedOrigins = [
-      'http://localhost:5173',              // Vite dev server
-      'http://localhost:3000',              // React dev server
-      'http://localhost:5174',              // Alternative Vite port
-      'http://localhost:4173',              // Vite preview
-      'https://citycollegeofmanagement.vercel.app', // Production frontend (update with your actual domain)
+      // 'http://localhost:5173',              // Vite dev server
+      // 'http://localhost:3000',              // React dev server
+      // 'http://localhost:5174',              // Alternative Vite port
+      // 'http://localhost:4173',              // Vite preview
+      'https://cityacademy.co.in',
+      'https://cityacademy.vercel.app', // Production frontend (update with your actual domain)
     ];
 
     // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
@@ -125,7 +126,7 @@ app.use('/api/admin', adminRoutes);
 app.get('/', (req, res) => {
   res.json({ 
     success: true,
-    message: 'City College of Management API',
+    message: 'City Academy API',
     version: '2.0',
     endpoints: {
       students: '/api/students',
@@ -236,7 +237,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log('='.repeat(50));
-  console.log('🚀 City College of Management API Server');
+  console.log('🚀 City Academy API Server');
   console.log('='.repeat(50));
   console.log(`📡 Server running on port: ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
