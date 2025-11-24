@@ -57,6 +57,17 @@ const studentSchema = new mongoose.Schema(
       type: String,
     },
 
+    adhaarNo: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    fatherContact: {
+      type: String,
+      required: true,
+    },
+
     // Address
     address: {
       type: String,

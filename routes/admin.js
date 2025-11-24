@@ -4,6 +4,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Student = require('../models/Student');
 const Contact = require('../models/Contact');
+const authMiddleware = require('../middleware/auth');
 
 // Hardcoded admin credentials (change these!)
 const ADMIN_CREDENTIALS = {
