@@ -16,12 +16,13 @@ const corsOptions = {
   origin: function (origin, callback) {
     // List of allowed origins
     const allowedOrigins = [
-      // 'http://localhost:5173',              // Vite dev server
-      // 'http://localhost:3000',              // React dev server
-      // 'http://localhost:5174',              // Alternative Vite port
-      // 'http://localhost:4173',              // Vite preview
-      'https://www.cityacademy.co.in/',
-      'https://cityacademy.vercel.app', // Production frontend (update with your actual domain)
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://localhost:5174',
+      'http://localhost:4173',
+      'https://www.cityacademy.co.in',   // ✅ NO trailing slash
+      'https://cityacademy.co.in',       // ✅ add non-www as well, just in case
+      'https://cityacademy.vercel.app',
     ];
 
     // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
