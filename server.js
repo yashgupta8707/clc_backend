@@ -10,24 +10,22 @@ dotenv.config();
 const app = express();
 
 // ============================================================
-// CORS Configuration (UPDATED - FIX FOR CORS ERRORS)
+// CORS Configuration
 // ============================================================
 const corsOptions = {
   origin: function (origin, callback) {
-    // List of allowed origins
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:3000',
       'http://localhost:5174',
       'http://localhost:4173',
-      'https://www.cityacademy.co.in',   // ✅ NO trailing slash
-      'https://cityacademy.co.in',       // ✅ add non-www as well, just in case
+      'https://www.cityacademy.co.in',
+      'https://cityacademy.co.in',
       'https://cityacademy.vercel.app',
     ];
 
-    // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -39,29 +37,10 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600 // Cache preflight requests for 10 minutes
+  maxAge: 600,
 };
 
-// ============================================================
-// Serve Static Files (Uploaded Photos & Signatures)
-// ============================================================
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-  maxAge: '1d', // Cache for 1 day
-  setHeaders: (res, filePath) => {
-    // Set proper MIME types
-    if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
-      res.set('Content-Type', 'image/jpeg');
-    } else if (filePath.endsWith('.png')) {
-      res.set('Content-Type', 'image/png');
-    }
-    // Allow cross-origin access to images
-    res.set('Access-Control-Allow-Origin', '*');
-  }
-}));
-
 app.use(cors(corsOptions));
-
-// Handle preflight requests
 app.options('*', cors(corsOptions));
 
 // ============================================================
@@ -83,20 +62,20 @@ if (process.env.NODE_ENV === 'development') {
 // ============================================================
 // MongoDB Connection
 // ============================================================
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log('✅ MongoDB Connected Successfully');
-  console.log(`📊 Database: ${mongoose.connection.name}`);
-})
-.catch(err => {
-  console.error('❌ MongoDB Connection Error:', err.message);
-  process.exit(1); // Exit if database connection fails
-});
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('✅ MongoDB Connected Successfully');
+    console.log(`📊 Database: ${mongoose.connection.name}`);
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB Connection Error:', err.message);
+    process.exit(1);
+  });
 
-// MongoDB connection events
 mongoose.connection.on('disconnected', () => {
   console.log('⚠️  MongoDB Disconnected');
 });
@@ -125,7 +104,7 @@ app.use('/api/admin', adminRoutes);
 // Root Route
 // ============================================================
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     success: true,
     message: 'City Academy API',
     version: '2.0',
@@ -134,10 +113,10 @@ app.get('/', (req, res) => {
       registration: '/api/students/register',
       contact: '/api/contact',
       courses: '/api/courses',
-      admin: '/api/admin'
+      admin: '/api/admin',
     },
     status: 'Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -148,7 +127,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     uptime: process.uptime(),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -160,7 +139,7 @@ app.use((req, res, next) => {
     success: false,
     message: 'Route not found',
     path: req.path,
-    method: req.method
+    method: req.method,
   });
 });
 
@@ -170,19 +149,18 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error('Error occurred:', err);
 
-  // Handle specific error types
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       success: false,
       message: 'Validation Error',
-      errors: Object.values(err.errors).map(e => e.message)
+      errors: Object.values(err.errors).map((e) => e.message),
     });
   }
 
   if (err.name === 'CastError') {
     return res.status(400).json({
       success: false,
-      message: 'Invalid ID format'
+      message: 'Invalid ID format',
     });
   }
 
@@ -190,25 +168,24 @@ app.use((err, req, res, next) => {
     return res.status(400).json({
       success: false,
       message: 'Duplicate entry',
-      field: Object.keys(err.keyPattern)[0]
+      field: Object.keys(err.keyPattern)[0],
     });
   }
 
   if (err.message === 'Not allowed by CORS') {
     return res.status(403).json({
       success: false,
-      message: 'CORS policy violation'
+      message: 'CORS policy violation',
     });
   }
 
-  // Default error response
-  res.status(err.status || 500).json({ 
+  res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? {
-      message: err.message,
-      stack: err.stack
-    } : {}
+    error:
+      process.env.NODE_ENV === 'development'
+        ? { message: err.message, stack: err.stack }
+        : {},
   });
 });
 
@@ -243,7 +220,6 @@ app.listen(PORT, () => {
   console.log(`📡 Server running on port: ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API URL: http://localhost:${PORT}`);
-  console.log(`📁 Static files served from: ${path.join(__dirname, 'uploads')}`);
   console.log('='.repeat(50));
   console.log('Available routes:');
   console.log(`  GET  /                    - API info`);

@@ -1,37 +1,38 @@
 // routes/students.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const path = require("path");
-const fs = require("fs");
-const multer = require("multer");
-const { body, validationResult } = require("express-validator");
-const Student = require("../models/Student");
+const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinary');
+const Student = require('../models/Student');
 
-// ensure uploads folder exists
-const uploadDir = path.join(__dirname, "..", "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
-// Multer setup for photo + signature
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+// ==============================
+// Multer + Cloudinary Storage
+// ==============================
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: 'cityacademy/students',
+      allowed_formats: ['jpg', 'jpeg', 'png'],
+      public_id: `${Date.now()}-${file.fieldname}`,
+      transformation: [{ width: 600, height: 600, crop: 'limit' }],
+    };
   },
 });
 
 const upload = multer({ storage });
 
-// Validation middleware (match frontend field names)
+// ==============================
+// Validation middleware
+// ==============================
 const validateStudent = [
-  body("studentName").notEmpty().trim().withMessage("Full name is required"),
-  body("email").isEmail().withMessage("Valid email is required"),
-  body("phone").isMobilePhone().withMessage("Valid phone number is required"),
-  body("course").notEmpty().withMessage("Course is required"),
+  body('studentName').notEmpty().trim().withMessage('Full name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('phone').isMobilePhone().withMessage('Valid phone number is required'),
+  body('course').notEmpty().withMessage('Course is required'),
+  body('dateOfBirth').notEmpty().withMessage('Date of birth is required'),
 ];
 
 // Helper: generate registration number like CCM2025xxxxx
@@ -41,12 +42,14 @@ const generateRegistrationNo = () => {
   return `CCM${year}${now.getTime().toString().slice(-5)}`;
 };
 
+// ==============================
 // Register new student
+// ==============================
 router.post(
-  "/register",
+  '/register',
   upload.fields([
-    { name: "photo", maxCount: 1 },
-    { name: "signature", maxCount: 1 },
+    { name: 'photo', maxCount: 1 },
+    { name: 'signature', maxCount: 1 },
   ]),
   validateStudent,
   async (req, res) => {
@@ -63,14 +66,12 @@ router.post(
       const photoFile = files.photo && files.photo[0];
       const signatureFile = files.signature && files.signature[0];
 
-      const photoPath = photoFile ? `/uploads/${photoFile.filename}` : null;
-      const signaturePath = signatureFile
-        ? `/uploads/${signatureFile.filename}`
-        : null;
+      // multer-storage-cloudinary puts the final URL in .path
+      const photoUrl = photoFile ? photoFile.path : null;
+      const signatureUrl = signatureFile ? signatureFile.path : null;
 
       const registrationNo = generateRegistrationNo();
 
-      // Build student data from body
       const body = req.body;
 
       const studentData = {
@@ -78,8 +79,8 @@ router.post(
         fullName: body.studentName,
         registrationNo,
         documents: {
-          photo: photoPath,
-          signature: signaturePath,
+          photo: photoUrl,
+          signature: signatureUrl,
         },
       };
 
@@ -88,28 +89,32 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: "Registration successful! We will contact you soon.",
+        message: 'Registration successful! We will contact you soon.',
         data: student,
       });
     } catch (error) {
-      console.error("Student registration error:", error);
+      console.error('Student registration error:', error);
+
       if (error.code === 11000) {
         return res.status(400).json({
           success: false,
-          message: "Email already registered",
+          message: 'Email or Aadhar already registered',
         });
       }
+
       res.status(500).json({
         success: false,
-        message: "Registration failed",
+        message: 'Registration failed',
         error: error.message,
       });
     }
   }
 );
 
+// ==============================
 // Get all students (admin)
-router.get("/", async (req, res) => {
+// ==============================
+router.get('/', async (req, res) => {
   try {
     const students = await Student.find().sort({ createdAt: -1 });
     res.json({
@@ -120,20 +125,22 @@ router.get("/", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error fetching students",
+      message: 'Error fetching students',
       error: error.message,
     });
   }
 });
 
-// Get student by ID (for details / print page)
-router.get("/:id", async (req, res) => {
+// ==============================
+// Get student by ID (details/print)
+// ==============================
+router.get('/:id', async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);
     if (!student) {
       return res.status(404).json({
         success: false,
-        message: "Student not found",
+        message: 'Student not found',
       });
     }
     res.json({
@@ -143,14 +150,16 @@ router.get("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error fetching student",
+      message: 'Error fetching student',
       error: error.message,
     });
   }
 });
 
+// ==============================
 // Update student status (admin)
-router.patch("/:id/status", async (req, res) => {
+// ==============================
+router.patch('/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
     const student = await Student.findByIdAndUpdate(
@@ -162,19 +171,19 @@ router.patch("/:id/status", async (req, res) => {
     if (!student) {
       return res.status(404).json({
         success: false,
-        message: "Student not found",
+        message: 'Student not found',
       });
     }
 
     res.json({
       success: true,
-      message: "Status updated successfully",
+      message: 'Status updated successfully',
       data: student,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error updating status",
+      message: 'Error updating status',
       error: error.message,
     });
   }
