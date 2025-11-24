@@ -20,7 +20,7 @@ const corsOptions = {
       // 'http://localhost:3000',              // React dev server
       // 'http://localhost:5174',              // Alternative Vite port
       // 'http://localhost:4173',              // Vite preview
-      'https://cityacademy.co.in',
+      'https://www.cityacademy.co.in/',
       'https://cityacademy.vercel.app', // Production frontend (update with your actual domain)
     ];
 
