@@ -35,11 +35,29 @@ const validateStudent = [
   body('dateOfBirth').notEmpty().withMessage('Date of birth is required'),
 ];
 
-// Helper: generate registration number like CCM2025xxxxx
-const generateRegistrationNo = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  return `CCM${year}${now.getTime().toString().slice(-5)}`;
+// Helper: generate sequential registration number like CA20250001, CA20250002, etc.
+const generateRegistrationNo = async () => {
+  const year = new Date().getFullYear();
+  const prefix = `CA${year}`;
+
+  // Find the latest student with this year's prefix
+  const latestStudent = await Student.findOne({
+    registrationNo: { $regex: `^${prefix}` }
+  }).sort({ registrationNo: -1 });
+
+  let nextNumber = 1;
+
+  if (latestStudent && latestStudent.registrationNo) {
+    // Extract the numeric part from the registration number
+    const lastNumber = parseInt(latestStudent.registrationNo.slice(prefix.length));
+    if (!isNaN(lastNumber)) {
+      nextNumber = lastNumber + 1;
+    }
+  }
+
+  // Format with leading zeros to make it 4 digits (e.g., 0001, 0002, etc.)
+  const paddedNumber = nextNumber.toString().padStart(4, '0');
+  return `${prefix}${paddedNumber}`;
 };
 
 // ==============================
@@ -70,7 +88,7 @@ router.post(
       const photoUrl = photoFile ? photoFile.path : null;
       const signatureUrl = signatureFile ? signatureFile.path : null;
 
-      const registrationNo = generateRegistrationNo();
+      const registrationNo = await generateRegistrationNo();
 
       const body = req.body;
 
