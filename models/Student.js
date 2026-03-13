@@ -65,6 +65,10 @@ const studentSchema = new mongoose.Schema(
       unique: true,
     },
 
+    panVoterIdNumber: {
+      type: String,
+    },
+
     fatherContact: {
       type: String,
       required: true,
